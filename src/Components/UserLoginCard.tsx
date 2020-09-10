@@ -8,7 +8,7 @@ export default function UserLoginCard() {
   const history = useHistory();
 
   async function handleLogout() {
-    // user.logout();
+    user.logout();
   }
 
   return (

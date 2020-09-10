@@ -15,18 +15,18 @@ function useUser() {
   let [registrationDetails, setRegistrationDetails] = useState({});
 
   useEffect(() => {
-    function hydrate() {
-      let isAuth = sessionStorage.getItem(KeyStore.IS_AUTH);
-      let username = sessionStorage.getItem(KeyStore.USERNAME);
-      let callsign = sessionStorage.getItem(KeyStore.CALLSIGN);
-
-      setIsAuth(isAuth === 'Y');
-      setUsername(username || 'Stranger');
-      setCallSign(callsign || '');
-    }
-    console.log('init useUser');
     hydrate();
   }, []);
+
+  function hydrate() {
+    let isAuth = sessionStorage.getItem(KeyStore.IS_AUTH);
+    let username = sessionStorage.getItem(KeyStore.USERNAME);
+    let callsign = sessionStorage.getItem(KeyStore.CALLSIGN);
+
+    setIsAuth(isAuth === 'Y');
+    setUsername(username || 'Stranger');
+    setCallSign(callsign || '');
+  }
 
   interface FakeFetchResponse {
     ok: boolean;
@@ -52,7 +52,10 @@ function useUser() {
     try {
       let res = await waitFor(1000);
       if (res.ok) {
-        storeUserInSession(true, _username);
+        if (username === _username) {
+          hydrate();
+          storeUserInSession(true, _username);
+        }
       } else {
         throw new Error('Login error!');
       }
@@ -140,12 +143,18 @@ function useUser() {
     }
   }
 
+  function logout() {
+    sessionStorage.setItem(KeyStore.IS_AUTH, 'N');
+    setIsAuth(false);
+  }
+
   return {
     isUserAuthenticated,
     username,
     login,
     register,
-    getRegistration
+    getRegistration,
+    logout
   };
 }
 const UserContainer = createContainer(useUser);
